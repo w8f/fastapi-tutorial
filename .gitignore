@@ -1,0 +1,8 @@
+.dockervenv
+.venv
+
+__pycache__
+
+poetry.lock
+
+pyproject.toml
