@@ -15,8 +15,12 @@ Fast API 入門してみた。
   - [Router](#router)
     - [routerの実装](#routerの実装)
     - [スキーマの定義](#スキーマの定義)
+  - [MySQL環境の構築](#mysql環境の構築)
+    - [Docker側](#docker側)
+    - [アプリ側](#アプリ側)
   - [tips](#tips)
     - [dictの展開について](#dictの展開について)
+    - [yieldの役割について](#yieldの役割について)
 
 ---
 
@@ -130,6 +134,31 @@ class Task(BaseModel):
     done: bool = Field(False, description='完了フラグ')
 ```
 
+## MySQL環境の構築
+
+### Docker側
+
+- docker-compose ファイルを参照
+
+### アプリ側
+
+mysqlクライアントのインストール
+
+- **sqlalchemy**というORMライブラリを使用
+  > sqlalchemy単体は非同期処理をサポートしていないため、\
+  > 下記ライブラリも入れる。
+- aiomysqlもインストール
+  > MySQL向けに非同期IO処理を提供するライブラリ\
+  > 依存するpymysqlもインストールされる。
+
+```sh
+# "demo-app" コンテナの中で "poetry add sqlalchemy aiomysql" を実行
+$ docker-compose exec demo-app poetry add sqlalchemy aiomysql
+```
+
+pyproject.tomlから、パッケージが追加されていることを確認する。\
+その後、DB接続クラスを作成する。
+
 ---
 
 ## tips
@@ -149,3 +178,12 @@ async def create_task(task_body: task_schema.TaskCreate):
     #       ) と等価となります。
     return task_schema.TaskCreateResponse(id=1, **task_body.dict())
 ```
+
+### yieldの役割について
+
+> 関数の処理を一時停止してから値を返す。
+
+returnの役割と対比するとわかりやすい。\
+セッションや、コネクションを関数の返り値として渡す時とかに使えそう？
+
+<http://ailaby.com/yield/>
