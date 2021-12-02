@@ -19,6 +19,7 @@ Fast API 入門してみた。
     - [Docker 側](#docker-側)
     - [アプリ側](#アプリ側)
     - [マイグレーション](#マイグレーション)
+  - [CRUD 処理](#crud-処理)
   - [tips](#tips)
     - [dict の展開について](#dict-の展開について)
     - [yield の役割について](#yield-の役割について)
@@ -169,6 +170,31 @@ pyproject.toml から、パッケージが追加されていることを確認�
 ```sh
 # api モジュールの migrate_db スクリプトを実行する
 $ docker-compose exec demo-app poetry run python -m api.migrate_db
+```
+
+## CRUD 処理
+
+api/cruds にリソースごとに、CRUD 処理を記述し、router 側でその処理を呼び出す流れ。
+
+```py
+# api/router/task.py抜粋
+from typing import List
+from fastapi import APIRouter, Depends
+import api.schemas.task as task_schema
+import api.cruds.task as task_crud
+from api.db import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+
+router = APIRouter()
+
+
+# Depends は引数に関数またはコルーチンを取り、
+# DI（Dependency Injection、依存性注入） を行う機構です。
+# db: AsyncSession = Depends(get_db)
+# DB接続部分にDIを利用することにより、ビジネスロジックとDBが密結合になることを防ぐ。
+@router.get("/tasks", response_model=List[task_schema.Task])
+async def list_tasks(db: AsyncSession = Depends(get_db)):
+    return await task_crud.get_tasks_with_done(db)
 ```
 
 ---
