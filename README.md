@@ -20,6 +20,9 @@ Fast API 入門してみた。
     - [アプリ側](#アプリ側)
     - [マイグレーション](#マイグレーション)
   - [CRUD 処理](#crud-処理)
+  - [Unit Test](#unit-test)
+    - [テスト関連のライブラリインストール](#テスト関連のライブラリインストール)
+    - [ユニットテスト実行方法](#ユニットテスト実行方法)
   - [tips](#tips)
     - [dict の展開について](#dict-の展開について)
     - [yield の役割について](#yield-の役割について)
@@ -195,6 +198,45 @@ router = APIRouter()
 @router.get("/tasks", response_model=List[task_schema.Task])
 async def list_tasks(db: AsyncSession = Depends(get_db)):
     return await task_crud.get_tasks_with_done(db)
+```
+
+## Unit Test
+
+### テスト関連のライブラリインストール
+
+下記ライブラリをインストール
+
+- pytest-asyncio
+
+  > unit-test ライブラリの pytest を非同期用に拡張
+
+- aiosqlite
+
+  > SQLite の非同期クライアント
+
+- httpx
+  > 非同期 HTTP クライアント
+
+```sh
+# -Dオプションは開発用モード。テストや開発時のローカル環境でのみ使用できる。
+# 本番環境では不要なライブラリをインストールせずに済み、
+# コンテナでインストールする場合も結果的にコンテナのイメージサイズを減らしたり、
+# ビルド時間を短縮することが可能
+docker-compose exec demo-app poetry add -D pytest-asyncio aiosqlite httpx
+```
+
+api/tests ディレクトリを作成し、**init**.py, test_main.py を作成する。\
+その後、fixture（テスト関数の前処理や後処理を定義することができる関数） を定義する。
+
+### ユニットテスト実行方法
+
+```sh
+# 1. コンテナ内に入る
+docker-compose exec demo-app bash
+# 2. poetryの仮想環境に入る
+poetry shell
+# 3. 実行
+pytest
 ```
 
 ---
